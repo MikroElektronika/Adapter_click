@@ -1,0 +1,68 @@
+'
+'Example for Adapter Click
+'
+'    Date          : Feb 2019.
+'    Author        : Jovan Stajkovic
+'
+'Test configuration FT90x :
+'    
+'    MCU                : FT900
+'    Dev. Board         : EasyFT90x v7 
+'    FT90x Compiler ver : v2.3.0.0
+'
+'---
+'
+'Description :
+'
+'The application is composed of three sections :
+'
+'- System Initialization - Initializes GPIO, SPI and LOG structures, sets INT pin as input, and  CS, PWM , RX and TX pins as output.
+'- Application Initialization - Initalizes SPI driver and makes an initial log.
+'- Application Task - (code snippet)  This is an example that shows the use of the Adapter click board. In this example we are writing
+'                     into a shift register.
+'
+'
+program Click_Adapter_FT90x
+
+include Click_Adapter_types
+include Click_Adapter_config
+
+sub procedure systemInit() 
+
+    mikrobus_gpioInit(_MIKROBUS1, _MIKROBUS_INT_PIN, _GPIO_INPUT) 
+    mikrobus_gpioInit(_MIKROBUS1, _MIKROBUS_CS_PIN, _GPIO_OUTPUT) 
+    mikrobus_gpioInit(_MIKROBUS1, _MIKROBUS_PWM_PIN, _GPIO_OUTPUT) 
+    mikrobus_gpioInit(_MIKROBUS1, _MIKROBUS_RX_PIN, _GPIO_OUTPUT) 
+    mikrobus_gpioInit(_MIKROBUS1, _MIKROBUS_TX_PIN, _GPIO_OUTPUT) 
+    mikrobus_spiInit(_MIKROBUS1, @_ADAPTER_SPI_CFG[0]) 
+    mikrobus_logInit(_LOG_USBUART, 9600) 
+    Delay_ms(100) 
+
+end sub
+
+sub procedure applicationInit() 
+
+    adapter_spiDriverInit(T_ADAPTER_P(@_MIKROBUS1_GPIO), T_ADAPTER_P(@_MIKROBUS1_SPI)) 
+    Delay_ms(100) 
+    mikrobus_logWrite("-----------------", _LOG_LINE) 
+    mikrobus_logWrite(" Adapter  Click  ", _LOG_LINE) 
+    mikrobus_logWrite("-----------------", _LOG_LINE) 
+
+end sub
+
+sub procedure applicationTask() 
+
+    adapter_turnPwmOn() 
+    adapter_writeData(0x00, 0x79) 
+
+end sub
+
+main :
+
+    systemInit() 
+    applicationInit() 
+    while (1) 
+        applicationTask() 
+    wend
+
+end.
